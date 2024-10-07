@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: youtube-downloader-bot
+    env: python
+    build:
+      context: .
+      docker:
+        - dockerfile: Dockerfile
+    envVars:
+      - key: TELEGRAM_TOKEN
+        value: 7001293936:AAEyX43MAmHqnAaKM_K55jFaORiBE0ebi98
+    ports:
+      - 8080:8080
+    commands:
+      start: python app.py
