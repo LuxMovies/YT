@@ -1,19 +1,14 @@
 import os
 import logging
-from telegram.ext import Updater, CommandHandler, MessageHandler
-from telegram import Bot
-import pytube
-import streamlink
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes
 
 TOKEN = os.environ.get('TELEGRAM_TOKEN')
-bot = Bot(TOKEN)
 
-logging.basicConfig(level=logging.INFO)
-
-def start(update, context):
+def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome to the YouTube Live Stream Downloader bot! Send me a YouTube live stream URL to download it.")
 
-def download_stream(update, context):
+def download_stream(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     url = update.message.text
     try:
         # Get the stream object
@@ -55,16 +50,16 @@ def download_stream(update, context):
     except Exception as e:
         context.bot.send_message(chat_id=update.effective_chat.id, text="Error: " + str(e))
 
-def main():
-    updater = Updater(TOKEN, use_context=True)
+def main() -> None:
+    application = ApplicationBuilder().token(TOKEN).build()
 
-    dp = updater.dispatcher
+    start_handler = CommandHandler('start', start)
+    application.add_handler(start_handler)
 
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(Filters.text, download_stream))
+    download_stream_handler = MessageHandler(None, download_stream)
+    application.add_handler(download_stream_handler)
 
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
 
 if __name__ == '__main__':
     main()
